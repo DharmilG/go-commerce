@@ -1,0 +1,23 @@
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Build output
+bin/
+dist/
+coverage.out
+coverage.html
+*.test
+*.prof
+
+# Local tooling
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+
+# Local test artifacts
+tmp/
+testdata/fuzz/*.zip
