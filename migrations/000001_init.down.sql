@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS idempotency_keys;
+DROP TABLE IF EXISTS order_items;
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS users;
