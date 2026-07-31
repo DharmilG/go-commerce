@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"encoding/base64"
 	"strings"
 	"testing"
 	"time"
@@ -87,13 +88,24 @@ func TestTokenManagerRejectsTamperedToken(t *testing.T) {
 		t.Fatalf("Issue() error = %v", err)
 	}
 
-	replacement := byte('A')
-	if token[len(token)-1] == replacement {
-		replacement = 'B'
+	parts := strings.Split(token, ".")
+	if len(parts) != 3 {
+		t.Fatalf("issued token has %d parts, want 3", len(parts))
 	}
-	tampered := token[:len(token)-1] + string(replacement)
-	if _, err := manager.Parse(tampered); err == nil {
-		t.Fatal("Parse() accepted a tampered token")
+	// Change a decoded signature byte. Flipping the final base64 character can
+	// leave the decoded signature unchanged because those bits are padding.
+	signature, err := base64.RawURLEncoding.DecodeString(parts[2])
+	if err != nil {
+		t.Fatalf("decode signature: %v", err)
+	}
+	if len(signature) == 0 {
+		t.Fatal("issued token has an empty signature")
+	}
+	signature[0] ^= 0x01
+	parts[2] = base64.RawURLEncoding.EncodeToString(signature)
+
+	if _, err := manager.Parse(strings.Join(parts, ".")); err == nil {
+		t.Fatal("Parse() accepted a token with a modified signature")
 	}
 }
 
